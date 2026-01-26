@@ -1,0 +1,57 @@
+services:
+  db:
+    image: mariadb:10.11
+    container_name: opendcim_db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: dcim
+      MYSQL_USER: dcim
+      MYSQL_PASSWORD: dcimpass
+    volumes:
+      - db_data:/var/lib/mysql
+
+  opendcim:
+    image: opendcim/opendcim:23.04
+    container_name: opendcim_web
+    depends_on:
+      - db
+    environment:
+      OPENDCIM_DB_HOST: db
+      OPENDCIM_DB_NAME: dcim
+      OPENDCIM_DB_USER: dcim
+      OPENDCIM_DB_PASS: dcimpass
+      OPENDCIM_AUTH: "OIDC"
+    volumes:
+      - dcim-data:/var/www/html/assets
+
+  nginx:
+    image: nginx:alpine
+    container_name: opendcim_nginx
+    restart: unless-stopped
+    depends_on:
+      - opendcim
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    container_name: keycloak
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    volumes:
+      - keycloak-data:/opt/keycloak/data
+      - ./keycloak/opendcim.json:/opt/keycloak/data/import/opendcim.json:ro
+
+
+volumes:
+  db_data:
+  dcim-data:
+  keycloak-data:

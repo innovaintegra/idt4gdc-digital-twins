@@ -1,0 +1,5 @@
+Manufacturer,Model,Height,Weight,DeviceType,NominalWatts,NumPower,NumPorts,PSNames,PortNames
+Generic,1U Switch,1,10,Switch,150,2,48,"PSU-A|PSU-B","eth1|eth2|eth3|eth4|eth5|eth6|eth7|eth8|eth9|eth10|eth11|eth12|eth13|eth14|eth15|eth16|eth17|eth18|eth19|eth20|eth21|eth22|eth23|eth24|eth25|eth26|eth27|eth28|eth29|eth30|eth31|eth32|eth33|eth34|eth35|eth36|eth37|eth38|eth39|eth40|eth41|eth42|eth43|eth44|eth45|eth46|eth47|eth48"
+Generic,1U Server,1,15,Server,300,2,2,"PSU-A|PSU-B","eth0|eth1"
+Generic,2U Server,2,25,Server,600,2,2,"PSU-A|PSU-B","eth0|eth1"
+Generic,4U GPU Server,4,45,Server,2000,2,2,"PSU-A|PSU-B","eth0|eth1"

@@ -1,0 +1,264 @@
+# See https://druid.apache.org/docs/latest/tutorials/docker/
+# Docker UI will be available from http://localhost:8888
+
+volumes:
+  postgres_data: {}
+  zookeeper_data: {}
+  zookeeper_datalog: {}
+  zookeeper_logs: {}
+  druid_middlemanager_var: {}
+  druid_historical_var: {}
+  druid_broker_var: {}
+  druid_coordinator_var: {}
+  druid_router_var: {}
+  druid_shared: {}
+  kafka_secrets: {}
+  kafka_config: {}
+  kafka_data: {}
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:17.6-trixie
+    # ports:
+    #   - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=FoolishPassword
+      - POSTGRES_USER=druid
+      - POSTGRES_DB=druid
+
+  zookeeper:
+    container_name: zookeeper
+    image: zookeeper:3.5.10
+    # ports:
+    #   - "2181:2181"
+    environment:
+      - ZOO_MY_ID=1
+    volumes:
+      - zookeeper_data:/data
+      - zookeeper_datalog:/datalog
+      - zookeeper_logs:/logs
+
+  druid-coordinator:
+    image: apache/druid:34.0.0
+    container_name: druid-coordinator
+    volumes:
+      - druid_shared:/opt/shared
+      - druid_coordinator_var:/opt/druid/var
+      - ./data:/data
+    depends_on:
+      - zookeeper
+      - postgres
+    # ports:
+    #   - "8081:8081"
+    command:
+      - coordinator
+    env_file:
+      - druid-environment.txt
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8081/status/health || exit 1"]
+      interval: 10s
+      retries: 3
+      start_interval: 1s
+      start_period: 5m
+  
+  druid-broker:
+    image: apache/druid:34.0.0
+    container_name: druid-broker
+    volumes:
+      - druid_broker_var:/opt/druid/var
+      - ./data:/data
+    depends_on:
+      - zookeeper
+      - postgres
+      - druid-coordinator
+    # ports:
+    #   - "8082:8082"
+    command:
+      - broker
+    env_file:
+      - druid-environment.txt
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8082/druid/broker/v1/readiness || exit 1"]
+      interval: 10s
+      retries: 3
+      start_interval: 1s
+      start_period: 5m
+
+  druid-historical:
+    image: apache/druid:34.0.0
+    container_name: druid-historical
+    volumes:
+      - druid_shared:/opt/shared
+      - druid_historical_var:/opt/druid/var
+      - ./data:/data
+    depends_on: 
+      - zookeeper
+      - postgres
+      - druid-coordinator
+    # ports:
+    #   - "8083:8083"
+    command:
+      - historical
+    env_file:
+      - druid-environment.txt
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8083/druid/historical/v1/readiness || exit 1"]
+      interval: 10s
+      retries: 3
+      start_interval: 1s
+      start_period: 5m
+
+  druid-middlemanager:
+    image: apache/druid:34.0.0
+    container_name: druid-middlemanager
+    volumes:
+      - druid_shared:/opt/shared
+      - druid_middlemanager_var:/opt/druid/var
+      - ./data:/data
+    depends_on: 
+      - zookeeper
+      - postgres
+      - druid-coordinator
+    # ports:
+    #   - "8091:8091"
+    #   - "8100-8105:8100-8105"
+    command:
+      - middleManager
+    env_file:
+      - druid-environment.txt
+  
+  druid-router:
+    image: apache/druid:34.0.0
+    container_name: druid-router
+    volumes:
+      - druid_router_var:/opt/druid/var
+      # - ./data:/data
+    depends_on:
+      - zookeeper
+      - postgres
+      - druid-coordinator
+    ports:
+      - "8888:8888"
+    command:
+      - router
+    env_file:
+      - druid-environment.txt
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8888/status/health || exit 1"]
+      interval: 10s
+      retries: 3
+      start_interval: 1s
+      start_period: 5m
+
+  kafka:
+    image: apache/kafka:3.7.1
+    container_name: kafka
+    # ports:
+    #   - 9092:9092
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --list || exit 1"]
+      interval: 10s
+      retries: 3
+      start_interval: 1s
+      start_period: 5m
+    volumes:
+      - kafka_secrets:/etc/kafka/secrets
+      - kafka_config:/mnt/shared/config
+      - kafka_data:/var/lib/kafka/data
+    environment:
+      # Overriding any configs wipes the defaults, so most of this is copied from /opt/kafka/config/server.properties
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - KAFKA_NODE_ID=1
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@localhost:9093
+      - KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      # Change advertised.listeners to use the in docker compose network name
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_PLAINTEXT,SASL_SSL:SASL_SSL
+      - KAFKA_NUM_NETWORK_THREADS=3
+      - KAFKA_NUM_IO_THREADS=8
+      - KAFKA_SOCKET_SEND_BUFFER_BYTES=102400
+      - KAFKA_SOCKET_RECEIVE_BUFFER_BYTES=102400
+      - KAFKA_SOCKET_REQUEST_MAX_BYTES=104857600
+      - KAFKA_LOG_DIRS=/var/lib/kafka/data
+      - KAFKA_NUM_PARTITIONS=1
+      - KAFKA_NUM_RECOVERY_THREADS_PER_DATA_DIR=1
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_LOG_RETENTION_HOURS=168
+      - KAFKA_LOG_SEGMENT_BYTES=1073741824
+      - KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS=300000
+  
+  simulation-server:
+    pull_policy: build
+    image: exadigit-simulation-server
+    build: .
+    container_name: simulation-server
+    command: ["python", "-m", "simulation_server.server.main"]
+    ports:
+      - "8081:8081"
+    depends_on:
+      druid-coordinator:
+        condition: service_healthy
+      druid-broker:
+        condition: service_healthy
+      druid-historical:
+        condition: service_healthy
+      druid-middlemanager:
+        condition: service_started
+      druid-router:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    environment:
+      - EXADIGIT_HTTP_PORT=8081
+      - EXADIGIT_ENV=dev
+      # - EXADIGIT_ROOT_PATH
+      - EXADIGIT_DEBUG_MODE=true
+      # - EXADIGIT_JOB_IMAGE
+      - EXADIGIT_ALLOW_ORIGINS=["http://localhost:8080", "http://localhost:${SIMSERVER_HOST_PORT:-8090}"]
+      - DRUID_SERVICE_URL=http://druid-router:8888
+      - KAFKA_BOOTSTRAP=kafka:9092
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8081/openapi.json || exit 1"]
+      interval: 10s
+      retries: 3
+      start_interval: 1s
+      start_period: 1m
+    volumes:
+      - "../exadigit/raps/config/idt4gdc_dc1.yaml:/app/raps/config/idt4gdc_dc1.yaml"
+      - "../exadigit/raps/raps/dataloaders/idt4gdc_dc1.py:/app/raps/raps/dataloaders/idt4gdc_dc1.py"
+      - "../exadigit/raps/raps/engine.py:/app/raps/raps/engine.py"
+      - "../exadigit/raps/raps/sim_config.py:/app/raps/raps/sim_config.py"
+      - "../exadigit/simulation_server/models/sim.py:/app/simulation_server/models/sim.py"
+      - "../exadigit/simulation_server/simulation/dataloaders/idt4gdc_dc1.py:/app/simulation_server/simulation/dataloaders/idt4gdc_dc1.py"
+      - "../exadigit/simulation_server/simulation/dataloaders/inline_jobs.py:/app/simulation_server/simulation/dataloaders/inline_jobs.py"
+      - "../exadigit/simulation_server/simulation/simulation.py:/app/simulation_server/simulation/simulation.py"
+
+  simulation-dashboard:
+    pull_policy: build
+    image: exadigit-simulation-dashboard
+    build:
+      context: ./simulation_dashboard
+      args:
+        VITE_PORT: "8080"
+        VITE_AUTH_URL: ""
+        VITE_BASE_PATH: "http://localhost:${SIMSERVER_HOST_PORT:-8090}"
+        VITE_API_PATH: "http://localhost:8081"
+    container_name: simulation-dashboard
+    ports:
+      - "${SIMSERVER_HOST_PORT:-8090}:8080"
+    depends_on:
+      simulation-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail -s http://localhost:8080/index.html || exit 1"]
+      interval: 10s
+      retries: 3
+      start_interval: 1s
+      start_period: 10s

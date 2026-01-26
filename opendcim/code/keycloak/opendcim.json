@@ -1,0 +1,47 @@
+{
+  "realm": "idt4gdc",
+  "enabled": true,
+
+  "roles": {
+    "realm": [
+      { "name": "admin", "description": "iDT4GDC admin role" }
+    ]
+  },
+
+  "clients": [
+    {
+      "clientId": "opendcim",
+      "name": "OpenDCIM",
+      "description": "OpenDCIM (iDT4GDC) OIDC client",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "CHANGE_ME",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "rootUrl": "https://localhost",
+      "baseUrl": "/",
+      "redirectUris": [
+        "https://localhost/*"
+      ],
+      "webOrigins": [
+        "https://localhost"
+      ]
+    }
+  ],
+
+  "users": [
+    {
+      "username": "test",
+      "enabled": true,
+      "firstName": "Test",
+      "lastName": "User",
+      "email": "test.user@example.com",
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "password", "temporary": false }
+      ],
+      "realmRoles": ["admin"]
+    }
+  ]
+}

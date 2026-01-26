@@ -1,0 +1,6 @@
+"Data Center ID","Cabinet","Position","Label","Height","Manufacturer","Model","Hostname","SerialNo","AssetTag","HalfDepth","BackSide","ESX","InstallDate","Reservation","Owner","PrimaryContact","CustomTags"
+"idt4gdc_dc1","DC1-R1-01","40","dc1-sw-01","1","Generic","1U Switch","dc1-sw-01","","","0","0","0","","0","","","network,switch"
+"idt4gdc_dc1","DC1-R1-01","38","dc1-mgmt-01","1","Generic","1U Server","dc1-mgmt-01","","","0","0","0","","0","","","mgmt"
+"idt4gdc_dc1","DC1-R1-01","30","dc1-cpu-01","2","Generic","2U Server","dc1-cpu-01","","","0","0","0","","0","","","compute,cpu"
+"idt4gdc_dc1","DC1-R1-02","30","dc1-cpu-02","2","Generic","2U Server","dc1-cpu-02","","","0","0","0","","0","","","compute,cpu"
+"idt4gdc_dc1","DC1-R1-03","30","dc1-gpu-01","4","Generic","4U GPU Server","dc1-gpu-01","","","0","0","0","","0","","","compute,gpu"
