@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# scripts/ is at: opendcim/scripts
 OPENDCIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # ----------------------------
-# Configuration (overridable)
+# Configuration
 # ----------------------------
 CERT_DIR="${CERT_DIR:-${OPENDCIM_ROOT}/code/nginx/certs}"
 CERT_NAME="${CERT_NAME:-localhost}"
