@@ -20,8 +20,6 @@ services:
   postgres:
     container_name: postgres
     image: postgres:17.6-trixie
-    # ports:
-    #   - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
@@ -32,8 +30,6 @@ services:
   zookeeper:
     container_name: zookeeper
     image: zookeeper:3.5.10
-    # ports:
-    #   - "2181:2181"
     environment:
       - ZOO_MY_ID=1
     volumes:
@@ -51,8 +47,6 @@ services:
     depends_on:
       - zookeeper
       - postgres
-    # ports:
-    #   - "8081:8081"
     command:
       - coordinator
     env_file:
@@ -74,8 +68,6 @@ services:
       - zookeeper
       - postgres
       - druid-coordinator
-    # ports:
-    #   - "8082:8082"
     command:
       - broker
     env_file:
@@ -98,8 +90,6 @@ services:
       - zookeeper
       - postgres
       - druid-coordinator
-    # ports:
-    #   - "8083:8083"
     command:
       - historical
     env_file:
@@ -122,9 +112,6 @@ services:
       - zookeeper
       - postgres
       - druid-coordinator
-    # ports:
-    #   - "8091:8091"
-    #   - "8100-8105:8100-8105"
     command:
       - middleManager
     env_file:
@@ -135,7 +122,6 @@ services:
     container_name: druid-router
     volumes:
       - druid_router_var:/opt/druid/var
-      # - ./data:/data
     depends_on:
       - zookeeper
       - postgres
@@ -156,8 +142,6 @@ services:
   kafka:
     image: apache/kafka:3.7.1
     container_name: kafka
-    # ports:
-    #   - 9092:9092
     healthcheck:
       test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --list || exit 1"]
       interval: 10s

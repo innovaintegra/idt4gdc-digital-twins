@@ -37,13 +37,13 @@ These CSV files define the **top-level physical structure**.
 
 1. Navigate to:  
    **Bulk Operations → Import Data Centers / Containers / Zones**
-2. Upload the container/datacentre CSV (e.g. `idt4gdc_containers_datacenters_zones.csv`)
+2. Upload `idt4gdc_container.csv`
 3. Map fields as required
 4. Import
 
 This creates:
 - Container: `idt4gdc`
-- Data centres (e.g. `idt4gdc_dc1`, `idt4gdc_dc2`)
+- Data centres: `idt4gdc_dc1`, `idt4gdc_dc2`
 - Zone: `Compute Room`
 
 ---
@@ -54,15 +54,18 @@ Device templates must exist **before** importing devices.
 
 1. Navigate to:  
    **Bulk Operations → Import Device Templates**
-2. Upload the device template CSV  
-   (e.g. `idt4gdc_dc1_device_templates.csv`)
+2. Upload `idt4gdc_device_templates.csv`
 3. Ensure columns are mapped correctly
 4. Import
 
-Templates include:
-- 1U / 2U / 4U servers
-- GPU servers
-- Network switches
+Templates included (all under manufacturer `Generic`):
+
+| Model | Height | Type | Nominal watts |
+|---|---|---|---|
+| 1U Switch | 1U | Switch | 150 W |
+| 1U Server | 1U | Server | 300 W |
+| 2U Server | 2U | Server | 600 W |
+| 4U GPU Server | 4U | Server | 2000 W |
 
 ---
 
@@ -74,9 +77,11 @@ Cabinets depend on:
 
 1. Navigate to:  
    **Bulk Operations → Import Cabinets**
-2. Upload the cabinet CSV (e.g. `idt4gdc_dc1_cabinets.csv`)
+2. Upload `idt4gdc_dc1_cabinets.csv`
 3. Ensure **Row is left unmapped** unless rows were created explicitly
 4. Import
+
+The file defines 42U cabinets named `DC1-R1-01`, `DC1-R1-02`, etc. in the `idt4gdc_dc1` data centre.
 
 > Rows are optional. Leaving them blank avoids `(Data Center + Row)` uniqueness errors.
 
@@ -90,9 +95,11 @@ Devices reference:
 
 1. Navigate to:  
    **Bulk Operations → Import New Devices**
-2. Upload the device CSV (e.g. `idt4gdc_dc1_devices.csv`)
+2. Upload `idt4gdc_dc1_devices.csv`
 3. Map fields carefully (cabinet, position, height, model, etc.)
 4. Import
+
+The file places switches, management servers, compute servers, and GPU servers into the cabinets defined in the previous step. Device types are tagged (`compute,cpu`, `compute,gpu`, `network,switch`, `mgmt`) for filtering in the UI.
 
 ---
 
