@@ -35,6 +35,7 @@ from raps.network import (
 )
 from raps.telemetry import Telemetry
 from raps.cooling import ThermoFluidsModel
+from raps.simple_cooling import SimpleCoolingModel
 from raps.flops import FLOPSManager
 from raps.workloads import Workload, continuous_job_generation
 from raps.account import Accounts
@@ -251,10 +252,13 @@ class Engine:
             continuous_workload = None
 
         if sim_config.cooling:
-            cooling_model = ThermoFluidsModel(**system_config_dict)
-            cooling_model.initialize()
-            if sim_config.weather:
-                cooling_model.weather = Weather(start, config=system_config_dict)
+            if system_config_dict.get('FMU_PATH'):
+                cooling_model = ThermoFluidsModel(**system_config_dict)
+                cooling_model.initialize()
+                if sim_config.weather:
+                    cooling_model.weather = Weather(start, config=system_config_dict)
+            else:
+                cooling_model = SimpleCoolingModel(**system_config_dict)
         else:
             cooling_model = None
 
@@ -394,11 +398,11 @@ class Engine:
         # Build a list of jobs whose start_time is <= current_time.
         eligible_jobs = [job for job in jobs_to_submit if
                          job.start_time is not None
-                         and job.start_time < self.current_timestep]
+                         and job.start_time <= self.current_timestep]
         # Remove those jobs from jobs_to_submit:
         jobs_to_submit[:] = [job for job in jobs_to_submit if
                              job.start_time is None
-                             or job.start_time >= self.current_timestep]
+                             or job.start_time > self.current_timestep]
         # Convert them to Job instances and build list of eligible jobs.
         self.queue += eligible_jobs
 

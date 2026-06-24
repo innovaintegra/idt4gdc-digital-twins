@@ -33,6 +33,11 @@ power:
   rectifier_loss_constant: 17
   rectifier_efficiency: 0.96
   power_cost: 0.094
+cooling:
+  cooling_efficiency: 1.0
+  wet_bulb_temp: 285.0
+  pue_idle: 1.25
+  pue_full_load: 1.10
 scheduler:
   job_arrival_time: 900
   mtbf: 11

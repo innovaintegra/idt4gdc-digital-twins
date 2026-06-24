@@ -30,7 +30,7 @@ def load_settings() -> AppSettings:
             system=os.getenv("EXADIGIT_SYSTEM", "idt4gdc_dc1"),
         ),
         opendcim=OpenDCIMSettings(
-            base_url=os.getenv("OPENDCIM_BASE_URL", "https://localhost:8080/api/v1"),
+            base_url=os.getenv("OPENDCIM_BASE_URL", "https://localhost/api/v1"),
             user_id=os.getenv("OPENDCIM_USERID", "test"),
             api_key=os.getenv("OPENDCIM_APIKEY", "0ff38b1e9b8052611d418c5cd6fe5ff0"),
             verify_ssl=os.getenv("OPENDCIM_VERIFY_SSL", "false").lower() in ("1", "true", "yes"),

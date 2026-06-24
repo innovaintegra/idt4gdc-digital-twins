@@ -219,6 +219,8 @@ services:
       - "../exadigit/raps/raps/dataloaders/idt4gdc_dc1.py:/app/raps/raps/dataloaders/idt4gdc_dc1.py"
       - "../exadigit/raps/raps/engine.py:/app/raps/raps/engine.py"
       - "../exadigit/raps/raps/sim_config.py:/app/raps/raps/sim_config.py"
+      - "../exadigit/raps/raps/simple_cooling.py:/app/raps/raps/simple_cooling.py"
+      - "../exadigit/raps/raps/system_config.py:/app/raps/raps/system_config.py"
       - "../exadigit/simulation_server/models/sim.py:/app/simulation_server/models/sim.py"
       - "../exadigit/simulation_server/simulation/dataloaders/idt4gdc_dc1.py:/app/simulation_server/simulation/dataloaders/idt4gdc_dc1.py"
       - "../exadigit/simulation_server/simulation/dataloaders/inline_jobs.py:/app/simulation_server/simulation/dataloaders/inline_jobs.py"

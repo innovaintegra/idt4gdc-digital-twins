@@ -5,11 +5,11 @@ from typing import Any
 import requests
 from fastapi import FastAPI, HTTPException
 
-from config import load_settings
-from models import SimulationRequest, SimulationResponse
-from clients.exadigit import ExaDigiTClient
-from clients.opendcim import OpenDCIMClient
-from poller.sim_poller import SimPoller, ActiveSim, load_node_to_pduid
+from app.config import load_settings
+from app.models import SimulationRequest, SimulationResponse
+from app.clients.exadigit import ExaDigiTClient
+from app.clients.opendcim import OpenDCIMClient
+from app.poller.sim_poller import SimPoller, ActiveSim, load_node_to_pduid
 
 
 def make_session() -> requests.Session:
@@ -55,6 +55,7 @@ def simulate(req: SimulationRequest) -> SimulationResponse:
         "start": req.start_time,
         "end": req.end_time,
         "replay": True,
+        "cooling": True,
         "jobs": [
             {
                 "job_id": j.job_id,

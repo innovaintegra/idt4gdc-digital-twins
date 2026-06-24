@@ -25,6 +25,6 @@ class SimulationResponse(BaseModel):
 
 
 class PduStat(BaseModel):
-    PDUID: int
+    PDUID: int | str
     Wattage: float
     LastRead: str

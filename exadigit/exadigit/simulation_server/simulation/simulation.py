@@ -206,57 +206,65 @@ def run_simulation(sim_config: ServerSimConfig):
                 }
 
         if tick.fmu_outputs and (is_last_tick or unix_timestamp % sample_cooling == 0):
-            # CDU columns are output in the dict with keys like this:
-            # "simulator[1].datacenter[1].computeBlock[1].cdu[1].summary.m_flow_prim"
-            # "simulator[1].datacenter[1].computeBlock[1].cdu[1].summary.V_flow_prim_GPM"
-            # "simulator[1].datacenter[1].computeBlock[2].cdu[1].summary.m_flow_prim"
-            # "simulator[1].datacenter[1].computeBlock[2].cdu[1].summary.V_flow_prim_GPM"
-            # nest_dict will un-flatten it
-            fmu_data = nest_dict({**tick.fmu_outputs})
+            if 'pue' in tick.fmu_outputs:
+                # SimpleCoolingModel output. Merge per-CDU temperature estimates if present.
+                cdu_temps = tick.fmu_outputs.get('cdu_temps')
+                if cdu_temps:
+                    for cdu_index, temps in cdu_temps.items():
+                        cooling_sim_cdu_map[cdu_index] = {
+                            **cooling_sim_cdu_map.get(cdu_index, {}),
+                            **temps,
+                        }
+            else:
+                # FMU-based cooling model output — nested key structure from Modelica.
+                # CDU columns are output in the dict with keys like this:
+                # "simulator[1].datacenter[1].computeBlock[1].cdu[1].summary.m_flow_prim"
+                # nest_dict will un-flatten it
+                fmu_data = nest_dict({**tick.fmu_outputs})
 
-            cdus_data = fmu_data['simulator'][1]['datacenter'][1]['computeBlock']
-            for cdu, cdu_data in cdus_data.items():
-                cdu_data = cdu_data['cdu'][1]['summary']
-                cooling_sim_cdu_map[cdu] = {
-                    **cooling_sim_cdu_map.get(cdu, {}),
-                    "work_done_by_cdup": cdu_data['W_flow_CDUP_kW'],
-                    "rack_return_temp": cdu_data['T_sec_r_C'],
-                    "rack_supply_temp": cdu_data['T_sec_s_C'],
-                    "rack_supply_pressure": cdu_data['p_sec_s_psig'],
-                    "rack_return_pressure": cdu_data['p_sec_r_psig'],
-                    "rack_flowrate": cdu_data['V_flow_sec_GPM'],
-                    "facility_return_temp": cdu_data["T_prim_r_C"],
-                    "facility_supply_temp": cdu_data['T_prim_s_C'],
-                    "facility_supply_pressure": cdu_data['p_prim_s_psig'],
-                    "facility_return_pressure": cdu_data['p_prim_r_psig'],
-                    "facility_flowrate": cdu_data['V_flow_prim_GPM'],
-                }
+                cdus_data = fmu_data['simulator'][1]['datacenter'][1]['computeBlock']
+                for cdu, cdu_data in cdus_data.items():
+                    cdu_data = cdu_data['cdu'][1]['summary']
+                    cooling_sim_cdu_map[cdu] = {
+                        **cooling_sim_cdu_map.get(cdu, {}),
+                        "work_done_by_cdup": cdu_data['W_flow_CDUP_kW'],
+                        "rack_return_temp": cdu_data['T_sec_r_C'],
+                        "rack_supply_temp": cdu_data['T_sec_s_C'],
+                        "rack_supply_pressure": cdu_data['p_sec_s_psig'],
+                        "rack_return_pressure": cdu_data['p_sec_r_psig'],
+                        "rack_flowrate": cdu_data['V_flow_sec_GPM'],
+                        "facility_return_temp": cdu_data["T_prim_r_C"],
+                        "facility_supply_temp": cdu_data['T_prim_s_C'],
+                        "facility_supply_pressure": cdu_data['p_prim_s_psig'],
+                        "facility_return_pressure": cdu_data['p_prim_r_psig'],
+                        "facility_flowrate": cdu_data['V_flow_prim_GPM'],
+                    }
 
-            cep_data = fmu_data['simulator'][1]['centralEnergyPlant'][1]
-            cooling_sim_cep = [CoolingSimCEP.model_validate({
-                "timestamp": timestamp,
-                "htw_flowrate": cep_data['hotWaterLoop'][1]['summary']['V_flow_htw_GPM'],
-                "ctw_flowrate": cep_data['coolingTowerLoop'][1]['summary']['V_flow_ctw_GPM'],
-                "htw_return_pressure": cep_data['hotWaterLoop'][1]['summary']['p_fac_htw_r_psig'],
-                "htw_supply_pressure": cep_data['hotWaterLoop'][1]['summary']['p_fac_htw_s_psig'],
-                "ctw_return_pressure": cep_data['coolingTowerLoop'][1]['summary']['p_fac_ctw_r_psig'],
-                "ctw_supply_pressure": cep_data['coolingTowerLoop'][1]['summary']['p_fac_ctw_s_psig'],
-                "htw_return_temp": cep_data['hotWaterLoop'][1]['summary']['T_fac_htw_r_C'],
-                "htw_supply_temp": cep_data['hotWaterLoop'][1]['summary']['T_fac_htw_s_C'],
-                "ctw_return_temp": cep_data['coolingTowerLoop'][1]['summary']['T_fac_ctw_r_C'],
-                "ctw_supply_temp": cep_data['coolingTowerLoop'][1]['summary']['T_fac_ctw_s_C'],
-                "power_consumption_htwps": cep_data['hotWaterLoop'][1]['summary']['W_flow_HTWP_kW'],
-                "power_consumption_ctwps": cep_data['coolingTowerLoop'][1]['summary']['W_flow_CTWP_kW'],
-                "power_consumption_fan": cep_data['coolingTowerLoop'][1]['summary']['W_flow_CT_kW'],
-                "htwp_speed": cep_data['hotWaterLoop'][1]['summary']['N_HTWP'],
-                "nctwps_staged": cep_data['coolingTowerLoop'][1]['summary']['n_CTWPs'],
-                "nhtwps_staged": cep_data['hotWaterLoop'][1]['summary']['n_HTWPs'],
-                "pue_output": fmu_data['pue'],
-                "nehxs_staged": cep_data['hotWaterLoop'][1]['summary']['n_EHXs'],
-                "ncts_staged": cep_data['coolingTowerLoop'][1]['summary']['n_CTs'],
-                "facility_return_temp": cep_data['hotWaterLoop'][1]['summary']['T_fac_htw_r_C'],
-                "cdu_loop_bypass_flowrate": fmu_data['simulator'][1]['datacenter'][1]['summary']['V_flow_bypass_GPM'],
-            })]
+                cep_data = fmu_data['simulator'][1]['centralEnergyPlant'][1]
+                cooling_sim_cep = [CoolingSimCEP.model_validate({
+                    "timestamp": timestamp,
+                    "htw_flowrate": cep_data['hotWaterLoop'][1]['summary']['V_flow_htw_GPM'],
+                    "ctw_flowrate": cep_data['coolingTowerLoop'][1]['summary']['V_flow_ctw_GPM'],
+                    "htw_return_pressure": cep_data['hotWaterLoop'][1]['summary']['p_fac_htw_r_psig'],
+                    "htw_supply_pressure": cep_data['hotWaterLoop'][1]['summary']['p_fac_htw_s_psig'],
+                    "ctw_return_pressure": cep_data['coolingTowerLoop'][1]['summary']['p_fac_ctw_r_psig'],
+                    "ctw_supply_pressure": cep_data['coolingTowerLoop'][1]['summary']['p_fac_ctw_s_psig'],
+                    "htw_return_temp": cep_data['hotWaterLoop'][1]['summary']['T_fac_htw_r_C'],
+                    "htw_supply_temp": cep_data['hotWaterLoop'][1]['summary']['T_fac_htw_s_C'],
+                    "ctw_return_temp": cep_data['coolingTowerLoop'][1]['summary']['T_fac_ctw_r_C'],
+                    "ctw_supply_temp": cep_data['coolingTowerLoop'][1]['summary']['T_fac_ctw_s_C'],
+                    "power_consumption_htwps": cep_data['hotWaterLoop'][1]['summary']['W_flow_HTWP_kW'],
+                    "power_consumption_ctwps": cep_data['coolingTowerLoop'][1]['summary']['W_flow_CTWP_kW'],
+                    "power_consumption_fan": cep_data['coolingTowerLoop'][1]['summary']['W_flow_CT_kW'],
+                    "htwp_speed": cep_data['hotWaterLoop'][1]['summary']['N_HTWP'],
+                    "nctwps_staged": cep_data['coolingTowerLoop'][1]['summary']['n_CTWPs'],
+                    "nhtwps_staged": cep_data['hotWaterLoop'][1]['summary']['n_HTWPs'],
+                    "pue_output": fmu_data['pue'],
+                    "nehxs_staged": cep_data['hotWaterLoop'][1]['summary']['n_EHXs'],
+                    "ncts_staged": cep_data['coolingTowerLoop'][1]['summary']['n_CTs'],
+                    "facility_return_temp": cep_data['hotWaterLoop'][1]['summary']['T_fac_htw_r_C'],
+                    "cdu_loop_bypass_flowrate": fmu_data['simulator'][1]['datacenter'][1]['summary']['V_flow_bypass_GPM'],
+                })]
 
         for cdu_index, cdu_data in cooling_sim_cdu_map.items():
             cdu_name, row, col = cdu_info(cdu_index)
