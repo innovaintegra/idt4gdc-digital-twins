@@ -129,12 +129,90 @@ This means:
 | Parameter | Value |
 |---|---|
 | CDUs | 1 |
-| Racks per CDU | 2 |
-| Nodes per rack | 256 (512 total) |
+| Racks per CDU | 4 |
+| Nodes per rack | 128 (512 total) |
 | CPU idle power | 90 W |
 | CPU max power | 280 W |
 | Memory power | 74.26 W |
 | NIC power | 20 W |
 | Switch power | 250 W |
+| PUE (idle / full load) | 1.25 / 1.10 |
+| Carbon intensity | 0.233 kgCO₂/kWh |
 | Polling quanta | 15 s |
 | Max nodes per job | 512 |
+
+---
+
+## Running an inline-job simulation
+
+The simulation server supports submitting an explicit list of jobs directly via the REST API, bypassing any workload replay files. This is the mechanism used by the DT Bridge.
+
+### Request
+
+```bash
+curl -s -X POST http://localhost:8081/simulation/run \
+  -H "Content-Type: application/json" \
+  -d '{
+    "system":   "idt4gdc_dc1",
+    "start":    "2026-06-24T12:00:00Z",
+    "end":      "2026-06-24T12:05:00Z",
+    "replay":   true,
+    "cooling":  true,
+    "realtime": true,
+    "jobs": [
+      {
+        "job_id":       "job-1",
+        "submit_time_s": 0,
+        "runtime_s":    120,
+        "nodes":        4,
+        "gpus":         0
+      },
+      {
+        "job_id":       "job-2",
+        "submit_time_s": 0,
+        "runtime_s":    180,
+        "nodes":        8,
+        "gpus":         0
+      }
+    ]
+  }'
+```
+
+Field reference:
+
+| Field | Required | Description |
+|---|---|---|
+| `system` | Yes | Must match a config name in `raps/config/` — use `idt4gdc_dc1` |
+| `start` / `end` | Yes | ISO 8601 UTC timestamps defining the simulation window |
+| `replay` | Yes | Must be `true` to activate the inline-jobs dataloader |
+| `cooling` | No | Enable the `SimpleCoolingModel` (PUE, CDU heat balance) |
+| `realtime` | No | Run at 1× wall-clock speed; omit or set `false` for max-speed |
+| `jobs[].job_id` | Yes | Unique identifier string for this job |
+| `jobs[].submit_time_s` | Yes | Seconds from `start` at which the job enters the queue (≥ 0) |
+| `jobs[].runtime_s` | Yes | Expected job duration in seconds (> 0) |
+| `jobs[].nodes` | Yes | Number of nodes required (1 – 512) |
+| `jobs[].gpus` | No | GPU count per node; leave 0 for this CPU-only system |
+
+> **Note on `submit_time_s`:** jobs with `submit_time_s = 0` are pre-placed before the simulation clock starts and are visible immediately on the first API poll. Jobs with a non-zero `submit_time_s` only appear in results after that many real seconds have elapsed.
+
+### Response
+
+```json
+{
+  "sim_id": "abc123xyz"
+}
+```
+
+### Polling job state
+
+```bash
+# List all jobs and their current state
+curl -s http://localhost:8081/simulation/abc123xyz/scheduler/jobs | python -m json.tool
+
+# Get power history for a specific job
+curl -s http://localhost:8081/simulation/abc123xyz/scheduler/jobs/job-1/power-history | python -m json.tool
+```
+
+Job states returned: `PENDING`, `RUNNING`, `COMPLETED`, `FAILED`, `CANCELLED`, `TIMEOUT`, `NODE_FAIL`.
+
+Power history entries are recorded every `power_update_freq` seconds (15 s by default) and report watts per job at that instant.
