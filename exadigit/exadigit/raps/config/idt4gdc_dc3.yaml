@@ -1,6 +1,6 @@
 system:
   num_cdus: 1
-  racks_per_cdu: 16
+  racks_per_cdu: 56
   nodes_per_rack: 32
   chassis_per_rack: 1
   nodes_per_blade: 2
@@ -10,7 +10,7 @@ system:
   nodes_per_rectifier: 8
   missing_racks: []
   down_nodes: []
-  gpu_racks: [12, 13, 14, 15]
+  gpu_racks: [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55]
   cpus_per_node: 2
   gpus_per_node: 1
   cpu_peak_flops: 2509440000000.0

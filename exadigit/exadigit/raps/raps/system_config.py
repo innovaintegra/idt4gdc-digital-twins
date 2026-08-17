@@ -27,6 +27,7 @@ class SystemSystemConfig(RAPSBaseModel):
     nodes_per_rectifier: int
     missing_racks: list[int] = []
     down_nodes: list[int] = []
+    gpu_racks: list[int] = []
     cpus_per_node: int
     gpus_per_node: int
     cpu_peak_flops: float
@@ -75,6 +76,19 @@ class SystemSystemConfig(RAPSBaseModel):
     @cached_property
     def available_nodes(self) -> int:
         return self.total_nodes - len(self.down_nodes)
+
+    @cached_property
+    def gpu_node_indices(self) -> set[int]:
+        """
+        Node indices with GPU hardware, derived from gpu_racks. Empty means "no per-rack
+        override" so power/resmgr fall back to applying gpus_per_node uniformly, matching
+        every system config that predates this field.
+        """
+        indices: set[int] = set()
+        for rack in self.gpu_racks:
+            start_node_id = rack * self.nodes_per_rack
+            indices.update(range(start_node_id, start_node_id + self.nodes_per_rack))
+        return indices
 
 
 class SystemPowerConfig(RAPSBaseModel):
@@ -228,6 +242,8 @@ class SystemConfig(RAPSBaseModel):
         config_dict["blades_per_chassis"] = self.system.blades_per_chassis
         config_dict["power_df_header"] = self.system.power_df_header
         config_dict["available_nodes"] = self.system.available_nodes
+        config_dict["gpu_racks"] = self.system.gpu_racks
+        config_dict["gpu_node_indices"] = self.system.gpu_node_indices
 
         config_dict = {renames.get(k, k.upper()): v for k, v in config_dict.items()}
         config_dict['system_config'] = self

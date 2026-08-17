@@ -1,0 +1,20 @@
+# Secrets
+.env
+
+# IDE
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+
+# TLS certs generated locally
+opendcim/code/nginx/certs/
+
+# Auto-cloned upstream ExaDigiT repo (see CLAUDE.md — do not edit or track)
+exadigit/code/
+
+# Office lock/temp files
+~$*
+~WRL*.tmp

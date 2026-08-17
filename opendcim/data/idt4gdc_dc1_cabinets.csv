@@ -1,4 +1,17 @@
 "Data Center","Cabinet","Height","Model","U1Position","MaxKW","MaxWeight","Owner","Zone","Row","X1","X2","Y1","Y2","FrontEdge",Notes
-"idt4gdc_dc1","DC1-R1-01","42","","1","","","","","","","","","","",
-"idt4gdc_dc1","DC1-R1-02","42","","1","","","","","","","","","","",
-"idt4gdc_dc1","DC1-R1-03","42","","1","","","","","","","","","","",
+"idt4gdc_dc1","DC1-R1-01","42","","1","40","","idt4gdc Cloud Compute","Compute Room","","","","","","",
+"idt4gdc_dc1","DC1-R1-02","42","","1","40","","idt4gdc Cloud Compute","Compute Room","","","","","","",
+"idt4gdc_dc1","DC1-R1-03","42","","1","40","","idt4gdc Cloud Compute","Compute Room","","","","","","",
+"idt4gdc_dc1","DC1-R1-04","42","","1","40","","idt4gdc Cloud Compute","Compute Room","","","","","","",
+"idt4gdc_dc1","DC1-R1-05","42","","1","40","","idt4gdc Cloud Compute","Compute Room","","","","","","",
+"idt4gdc_dc1","DC1-R1-06","42","","1","40","","idt4gdc Cloud Compute","Compute Room","","","","","","",
+"idt4gdc_dc1","DC1-R1-07","42","","1","40","","idt4gdc Cloud Compute","Compute Room","","","","","","",
+"idt4gdc_dc1","DC1-R1-08","42","","1","40","","idt4gdc Cloud Compute","Compute Room","","","","","","",
+"idt4gdc_dc1","DC1-R1-09","42","","1","40","","idt4gdc Cloud Compute","Compute Room","","","","","","",
+"idt4gdc_dc1","DC1-R1-10","42","","1","40","","idt4gdc Cloud Compute","Compute Room","","","","","","",
+"idt4gdc_dc1","DC1-R1-11","42","","1","40","","idt4gdc Cloud Compute","Compute Room","","","","","","",
+"idt4gdc_dc1","DC1-R1-12","42","","1","40","","idt4gdc Cloud Compute","Compute Room","","","","","","",
+"idt4gdc_dc1","DC1-R1-13","42","","1","42","","idt4gdc Cloud Compute","Compute Room","","","","","","","GPU rack (gpu_racks: [12,13,14,15] in idt4gdc_dc1.yaml)"
+"idt4gdc_dc1","DC1-R1-14","42","","1","42","","idt4gdc Cloud Compute","Compute Room","","","","","","","GPU rack (gpu_racks: [12,13,14,15] in idt4gdc_dc1.yaml)"
+"idt4gdc_dc1","DC1-R1-15","42","","1","42","","idt4gdc Cloud Compute","Compute Room","","","","","","","GPU rack (gpu_racks: [12,13,14,15] in idt4gdc_dc1.yaml)"
+"idt4gdc_dc1","DC1-R1-16","42","","1","42","","idt4gdc Cloud Compute","Compute Room","","","","","","","GPU rack (gpu_racks: [12,13,14,15] in idt4gdc_dc1.yaml)"

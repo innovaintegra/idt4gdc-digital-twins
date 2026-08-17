@@ -91,6 +91,7 @@ def _build_workload(
             account="default",
             cpu_trace=cpu_trace,
             gpu_trace=gpu_trace,
+            gpu_units_required=gpus_requested,
             nrx_trace=nrx_trace,
             ntx_trace=ntx_trace,
             end_state="C",

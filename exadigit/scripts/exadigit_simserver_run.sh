@@ -7,6 +7,8 @@ EXADIGIT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CODE_DIR="${EXADIGIT_ROOT}/code"
 CUSTOM_COMPOSE="${EXADIGIT_ROOT}/exadigit/docker-compose.yml"
 CODE_COMPOSE="${CODE_DIR}/docker-compose.yml"
+CUSTOM_DRUID_ENV="${EXADIGIT_ROOT}/exadigit/druid-environment.txt"
+CODE_DRUID_ENV="${CODE_DIR}/druid-environment.txt"
 
 log() { echo -e "\n==> $*\n"; }
 
@@ -24,9 +26,19 @@ if [[ ! -f "${CUSTOM_COMPOSE}" ]]; then
   exit 1
 fi
 
+if [[ ! -f "${CUSTOM_DRUID_ENV}" ]]; then
+  echo "ERROR: Custom druid-environment.txt not found at:"
+  echo "  ${CUSTOM_DRUID_ENV}"
+  exit 1
+fi
+
 # ---- Replace upstream compose ----
 log "Installing custom docker-compose.yml into upstream tree"
 cp "${CUSTOM_COMPOSE}" "${CODE_COMPOSE}"
+
+# ---- Replace upstream Druid env (tuned-down indexer memory, see file comments) ----
+log "Installing custom druid-environment.txt into upstream tree"
+cp "${CUSTOM_DRUID_ENV}" "${CODE_DRUID_ENV}"
 
 # ---- Run docker compose ----
 log "Starting ExaDigiT Simulation Server stack"

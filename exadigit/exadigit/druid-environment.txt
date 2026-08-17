@@ -1,0 +1,67 @@
+KAFKA_BOOTSTRAP=kafka:9092
+# Leave these as kafka defaults
+KAFKA_SECURITY_PROTOCOL=PLAINTEXT
+KAFKA_SASL_MECHANISM=GSSAPI
+KAFKA_SASL_JAAS_CONFIG=
+
+# Java tuning
+# iDT4GDC: this env file is shared by all 5 Druid service containers (coordinator,
+# broker, historical, middlemanager, router) via docker-compose's env_file:, and none
+# of them has a docker mem_limit set. DRUID_SINGLE_NODE_CONF only applies its preset to
+# the single-process `start-druid` command, not to these separately-launched service
+# commands, so with the Xmx/direct-memory settings below left commented out (upstream
+# default) each service's JVM auto-sizes its own heap/off-heap buffers against the
+# *whole* WSL2 VM's visible memory rather than a fair per-service share. At dc1/dc2
+# scale that stayed under the WSL2 VM's default 50%-of-host memory ceiling, but at
+# dc3's larger job counts (thousands of jobs/sweep) it blew past the ceiling entirely
+# (~15.5GB vmmemWSL against a ~15.65GB cap) and made the whole Docker engine
+# unresponsive rather than just failing one query. Setting explicit fixed values here
+# caps each of the 5 JVMs individually so they can't collectively exceed the VM budget.
+DRUID_XMX=512m
+DRUID_XMS=512m
+DRUID_MAXNEWSIZE=128m
+DRUID_NEWSIZE=128m
+DRUID_MAXDIRECTMEMORYSIZE=512m
+DRUID_SINGLE_NODE_CONF=nano-quickstart
+
+druid_emitter_logging_logLevel=debug
+
+druid_extensions_loadList=["druid-histogram", "druid-datasketches", "druid-lookups-cached-global", "postgresql-metadata-storage", "druid-multi-stage-query", "druid-parquet-extensions", "druid-kafka-indexing-service"]
+
+druid_zk_service_host=zookeeper
+
+druid_metadata_storage_host=
+druid_metadata_storage_type=postgresql
+druid_metadata_storage_connector_connectURI=jdbc:postgresql://postgres:5432/druid
+druid_metadata_storage_connector_user=druid
+druid_metadata_storage_connector_password=FoolishPassword
+
+druid_coordinator_balancer_strategy=cachingCost
+
+# iDT4GDC: upstream default here was Xmx1g/Xms1g/MaxDirectMemorySize=3g -- sized for
+# production ingestion volume, not a handful of small JSON event streams from a local
+# single-node dev digital-twin. At worker_capacity=10 that's up to ~40GB worst case for
+# concurrent indexing tasks, which was pinning the WSL2 VM's entire memory budget
+# (druid-middlemanager alone measured at 8.19GB / 53% of the 15GB VM limit even at rest)
+# and appears to have been the actual cause of repeated Docker Desktop engine crashes.
+druid_indexer_runner_javaOptsArray=["-server", "-Xmx256m", "-Xms256m", "-XX:MaxDirectMemorySize=512m", "-Duser.timezone=UTC", "-Dfile.encoding=UTF-8", "-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager"]
+druid_indexer_fork_property_druid_processing_buffer_sizeBytes=64MiB
+
+druid_storage_type=local
+druid_storage_storageDirectory=/opt/shared/segments
+druid_indexer_logs_type=file
+druid_indexer_logs_directory=/opt/shared/indexing-logs
+
+druid_processing_numThreads=2
+druid_processing_numMergeBuffers=2
+
+# iDT4GDC: at numMergeBuffers=2 (tuned down for the same WSL2 memory-budget reason as above),
+# GROUP BY queries over many distinct entities (e.g. thousands of jobs in a saturation-sweep sim)
+# can exceed the merge buffer's in-memory capacity and fail with "Resource limit exceeded: Not
+# enough merge buffer memory". Enabling on-disk spilling for those queries (as Druid's own error
+# message suggests) fixes this without growing the buffer/heap back up.
+druid_query_groupBy_maxOnDiskStorage=1073741824
+
+DRUID_LOG4J=<?xml version="1.0" encoding="UTF-8" ?><Configuration status="WARN"><Appenders><Console name="Console" target="SYSTEM_OUT"><PatternLayout pattern="%d{ISO8601} %p [%t] %c - %m%n"/></Console></Appenders><Loggers><Root level="info"><AppenderRef ref="Console"/></Root><Logger name="org.apache.druid.jetty.RequestLog" additivity="false" level="DEBUG"><AppenderRef ref="Console"/></Logger></Loggers></Configuration>
+
+druid_worker_capacity=10

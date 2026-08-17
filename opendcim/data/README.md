@@ -43,7 +43,7 @@ These CSV files define the **top-level physical structure**.
 
 This creates:
 - Container: `idt4gdc`
-- Data centres: `idt4gdc_dc1`, `idt4gdc_dc2`
+- Data centres: `idt4gdc_dc1`, `idt4gdc_dc2`, `idt4gdc_dc3`
 - Zone: `Compute Room`
 
 ---
@@ -77,11 +77,19 @@ Cabinets depend on:
 
 1. Navigate to:  
    **Bulk Operations → Import Cabinets**
-2. Upload `idt4gdc_dc1_cabinets.csv`
+2. Upload `idt4gdc_dc1_cabinets.csv` (repeat for `idt4gdc_dc2_cabinets.csv`, `idt4gdc_dc3_cabinets.csv`)
 3. Ensure **Row is left unmapped** unless rows were created explicitly
 4. Import
 
-The file defines 42U cabinets named `DC1-R1-01`, `DC1-R1-02`, etc. in the `idt4gdc_dc1` data centre.
+Each file defines 42U cabinets named `DC{n}-R1-01`, `DC{n}-R1-02`, etc. in the corresponding data centre:
+
+| Data centre | Racks | GPU racks | Total nodes |
+|---|---|---|---|
+| `idt4gdc_dc1` | 16 | 13–16 (4) | 512 |
+| `idt4gdc_dc2` | 12 | 10–12 (3) | 384 |
+| `idt4gdc_dc3` | 56 | 43–56 (14) | 1792 |
+
+GPU racks (tagged in the `Notes` column) are always the last N racks of each data centre, matching the `gpu_racks` field (0-indexed) in the corresponding `raps/config/idt4gdc_dc{n}.yaml`.
 
 > Rows are optional. Leaving them blank avoids `(Data Center + Row)` uniqueness errors.
 
@@ -95,9 +103,11 @@ Devices reference:
 
 1. Navigate to:  
    **Bulk Operations → Import New Devices**
-2. Upload `idt4gdc_dc1_devices.csv`
+2. Upload `idt4gdc_dc1_devices.csv` (repeat for `idt4gdc_dc2_devices.csv`, `idt4gdc_dc3_devices.csv`)
 3. Map fields carefully (cabinet, position, height, model, etc.)
 4. Import
+
+Node hostnames restart from `node0000` in each data centre (RAPS names nodes purely by index within a system, with no DC prefix) — they're only unambiguous when combined with the `Data Center ID` column, which is how OpenDCIM keeps `idt4gdc_dc1`'s `node0000` distinct from `idt4gdc_dc2`'s `node0000`. For the same reason, the DT Bridge keeps a separate `node_to_pduid_{dc}.json` mapping file per data centre rather than one shared file (see `bridge/README.md`).
 
 The file places switches, management servers, compute servers, and GPU servers into the cabinets defined in the previous step. Device types are tagged (`compute,cpu`, `compute,gpu`, `network,switch`, `mgmt`) for filtering in the UI.
 

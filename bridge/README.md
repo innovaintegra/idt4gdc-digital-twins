@@ -157,6 +157,18 @@ The bridge requires an explicit mapping from ExaDigiT node IDs to OpenDCIM PDU I
 }
 ```
 
-The default mapping at `app/mappings/node_to_pduid.json` covers 512 nodes (`node0000`–`node0511`) across two PDUs (IDs 161 and 162), corresponding to the two-rack `idt4gdc_dc1` system configuration.
+The default mapping at `app/mappings/node_to_pduid.json` covers the 512 nodes (`node0000`–`node0511`) of the `idt4gdc_dc1` system configuration.
 
 To use a different data centre topology, replace this file (or point `NODE_PDUID_MAP` to an alternative path) so the node IDs and PDU IDs match those configured in OpenDCIM.
+
+### Multiple data centres
+
+RAPS names nodes purely by index within a system (`node0000`, `node0001`, ...) with no data-centre prefix, so `idt4gdc_dc1`'s `node0000` and `idt4gdc_dc2`'s `node0000` are different physical nodes that happen to share a name. A single flat mapping file can't disambiguate that, so each data centre gets its own mapping file instead:
+
+| System | Mapping file | Nodes |
+|---|---|---|
+| `idt4gdc_dc1` | `app/mappings/node_to_pduid.json` | `node0000`–`node0511` (512) |
+| `idt4gdc_dc2` | `app/mappings/node_to_pduid_dc2.json` | `node0000`–`node0383` (384) |
+| `idt4gdc_dc3` | `app/mappings/node_to_pduid_dc3.json` | `node0000`–`node1791` (1792) |
+
+The bridge only loads one `EXADIGIT_SYSTEM`/`NODE_PDUID_MAP` pair per running instance (see `app/config.py`) — there's no per-request system switching. To bridge more than one data centre at once, run a separate bridge container per DC, each with its own `.env` (distinct `EXADIGIT_SYSTEM`, `NODE_PDUID_MAP`, and `BRIDGE_PORT`).
