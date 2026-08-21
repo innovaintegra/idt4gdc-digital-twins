@@ -43,7 +43,7 @@ These CSV files define the **top-level physical structure**.
 
 This creates:
 - Container: `idt4gdc`
-- Data centres: `idt4gdc_dc1`, `idt4gdc_dc2`, `idt4gdc_dc3`
+- Data centres: `idt4gdc_dc1`, `idt4gdc_dc2`, `idt4gdc_dc3`, `idt4gdc_dc4`
 - Zone: `Compute Room`
 
 ---
@@ -77,7 +77,7 @@ Cabinets depend on:
 
 1. Navigate to:  
    **Bulk Operations → Import Cabinets**
-2. Upload `idt4gdc_dc1_cabinets.csv` (repeat for `idt4gdc_dc2_cabinets.csv`, `idt4gdc_dc3_cabinets.csv`)
+2. Upload `idt4gdc_dc1_cabinets.csv` (repeat for `idt4gdc_dc2_cabinets.csv`, `idt4gdc_dc3_cabinets.csv`, `idt4gdc_dc4_cabinets.csv`)
 3. Ensure **Row is left unmapped** unless rows were created explicitly
 4. Import
 
@@ -88,6 +88,7 @@ Each file defines 42U cabinets named `DC{n}-R1-01`, `DC{n}-R1-02`, etc. in the c
 | `idt4gdc_dc1` | 16 | 13–16 (4) | 512 |
 | `idt4gdc_dc2` | 12 | 10–12 (3) | 384 |
 | `idt4gdc_dc3` | 56 | 43–56 (14) | 1792 |
+| `idt4gdc_dc4` | 6 | 6 (1) | 192 |
 
 GPU racks (tagged in the `Notes` column) are always the last N racks of each data centre, matching the `gpu_racks` field (0-indexed) in the corresponding `raps/config/idt4gdc_dc{n}.yaml`.
 
@@ -103,7 +104,7 @@ Devices reference:
 
 1. Navigate to:  
    **Bulk Operations → Import New Devices**
-2. Upload `idt4gdc_dc1_devices.csv` (repeat for `idt4gdc_dc2_devices.csv`, `idt4gdc_dc3_devices.csv`)
+2. Upload `idt4gdc_dc1_devices.csv` (repeat for `idt4gdc_dc2_devices.csv`, `idt4gdc_dc3_devices.csv`, `idt4gdc_dc4_devices.csv`)
 3. Map fields carefully (cabinet, position, height, model, etc.)
 4. Import
 

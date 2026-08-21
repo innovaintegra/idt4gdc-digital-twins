@@ -8,7 +8,7 @@ DB_PASS="${DB_PASS:-rootpass}"
 
 # ---- OIDC parameters ----
 OIDC_ENDPOINT="${OIDC_ENDPOINT:-http://keycloak:8080/realms/idt4gdc}"
-OIDC_USERID="${OIDC_USERID:-test}"
+OIDC_USERID="${OIDC_USERID:-preferred_username}"
 OIDC_CLIENT_ID="${OIDC_CLIENT_ID:-opendcim}"
 OIDC_CLIENT_SECRET="${OIDC_CLIENT_SECRET:-CHANGE_ME}"
 

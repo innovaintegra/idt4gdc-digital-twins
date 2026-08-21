@@ -1,0 +1,60 @@
+system:
+  num_cdus: 1
+  racks_per_cdu: 6
+  nodes_per_rack: 32
+  chassis_per_rack: 1
+  nodes_per_blade: 2
+  switches_per_chassis: 4
+  nics_per_node: 4
+  rectifiers_per_chassis: 4
+  nodes_per_rectifier: 8
+  missing_racks: []
+  down_nodes: []
+  gpu_racks: [5]
+  cpus_per_node: 2
+  gpus_per_node: 1
+  cpu_peak_flops: 2509440000000.0
+  gpu_peak_flops: 19790000000000.0
+  cpu_fp_ratio: 0.667
+  gpu_fp_ratio: 0.667
+power:
+  power_gpu_idle: 50
+  power_gpu_max: 350
+  power_cpu_idle: 90
+  power_cpu_max: 280
+  power_mem: 74.26
+  power_nic: 20
+  power_nvme: 30
+  power_switch: 250
+  power_cdu: 8473.47
+  power_update_freq: 15
+  rectifier_peak_threshold: 13670
+  sivoc_loss_constant: 13
+  sivoc_efficiency: 0.98
+  rectifier_loss_constant: 17
+  rectifier_efficiency: 0.96
+  power_cost: 0.15
+  carbon_intensity: 0.233
+  power_storage_overhead_kw: 20.0
+cooling:
+  cooling_efficiency: 0.92
+  wet_bulb_temp: 289.0
+  pue_idle: 1.45
+  pue_full_load: 1.30
+  cdu_supply_temp_c: 20.0
+  cdu_delta_t_c: 15.0
+  chiller_approach_c: 3.0
+scheduler:
+  job_arrival_time: 90
+  mtbf: 51
+  trace_quanta: 15
+  min_wall_time: 60
+  max_wall_time: 172800
+  ui_update_freq: 900
+  max_nodes_per_job: 16
+  job_end_probs:
+    COMPLETED: 0.78
+    FAILED: 0.09
+    CANCELLED: 0.08
+    TIMEOUT: 0.04
+    NODE_FAIL: 0.01

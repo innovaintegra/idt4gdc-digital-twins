@@ -100,3 +100,16 @@ See [`opendcim/README.md`](opendcim/README.md)
 The `bridge/` directory contains the integration service that connects ExaDigiT and OpenDCIM in real time.
 
 See [`bridge/README.md`](bridge/README.md)
+
+---
+
+## Demonstration sites
+
+Four sibling data centre systems are modelled (`idt4gdc_dc1`–`idt4gdc_dc4`), each mapped to one of the project's four demonstration sites. Sites are matched to systems by scale, reflecting real-world siting constraints on land, power, and cooling for each location:
+
+| System | Demonstration site | Scale | Rationale                                                                                                                                             |
+|---|---|---|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `idt4gdc_dc3` | Reading | 1792 nodes / 56 racks (largest) | Thames Valley / M4 corridor - the UK's principal commercial data-centre cluster, with the power and land availability to support the large-scale site |
+| `idt4gdc_dc1` | Edinburgh | 512 nodes / 16 racks | Established secondary hub with renewable power and a cooler climate, supporting a medium-large site                                                   |
+| `idt4gdc_dc2` | London | 384 nodes / 12 racks | Land and grid capacity within the city constrain the footprint to small-medium site                                                                   |
+| `idt4gdc_dc4` | Peterborough | 192 nodes / 6 racks (smallest) | Smaller regional/edge-scale site                                                                                                                      |

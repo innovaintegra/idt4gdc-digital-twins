@@ -1,0 +1,7 @@
+"Data Center","Cabinet","Height","Model","U1Position","MaxKW","MaxWeight","Owner","Zone","Row","X1","X2","Y1","Y2","FrontEdge",Notes
+"idt4gdc_dc4","DC4-R1-01","42","","1","40","","idt4gdc Cloud Compute","Compute Room","","","","","",""
+"idt4gdc_dc4","DC4-R1-02","42","","1","40","","idt4gdc Cloud Compute","Compute Room","","","","","",""
+"idt4gdc_dc4","DC4-R1-03","42","","1","40","","idt4gdc Cloud Compute","Compute Room","","","","","",""
+"idt4gdc_dc4","DC4-R1-04","42","","1","40","","idt4gdc Cloud Compute","Compute Room","","","","","",""
+"idt4gdc_dc4","DC4-R1-05","42","","1","40","","idt4gdc Cloud Compute","Compute Room","","","","","",""
+"idt4gdc_dc4","DC4-R1-06","42","","1","42","","idt4gdc Cloud Compute","Compute Room","","","","","","","GPU rack (gpu_racks: [5] in idt4gdc_dc4.yaml)"

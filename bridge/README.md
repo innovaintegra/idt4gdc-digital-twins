@@ -165,10 +165,13 @@ To use a different data centre topology, replace this file (or point `NODE_PDUID
 
 RAPS names nodes purely by index within a system (`node0000`, `node0001`, ...) with no data-centre prefix, so `idt4gdc_dc1`'s `node0000` and `idt4gdc_dc2`'s `node0000` are different physical nodes that happen to share a name. A single flat mapping file can't disambiguate that, so each data centre gets its own mapping file instead:
 
-| System | Mapping file | Nodes |
-|---|---|---|
-| `idt4gdc_dc1` | `app/mappings/node_to_pduid.json` | `node0000`–`node0511` (512) |
-| `idt4gdc_dc2` | `app/mappings/node_to_pduid_dc2.json` | `node0000`–`node0383` (384) |
-| `idt4gdc_dc3` | `app/mappings/node_to_pduid_dc3.json` | `node0000`–`node1791` (1792) |
+| System | Demonstration site | Mapping file | Nodes |
+|---|---|---|---|
+| `idt4gdc_dc1` | Edinburgh | `app/mappings/node_to_pduid.json` | `node0000`–`node0511` (512) |
+| `idt4gdc_dc2` | London | `app/mappings/node_to_pduid_dc2.json` | `node0000`–`node0383` (384) |
+| `idt4gdc_dc3` | Reading | `app/mappings/node_to_pduid_dc3.json` | `node0000`–`node1791` (1792) |
+| `idt4gdc_dc4` | Peterborough | `app/mappings/node_to_pduid_dc4.json` | `node0000`–`node0191` (192) |
+
+Sites are matched to systems by scale (see the root [`README.md`](../README.md#demonstration-sites) for the rationale) — the mapping is a documentation convention only, not something encoded in the bridge, ExaDigiT, or OpenDCIM configuration.
 
 The bridge only loads one `EXADIGIT_SYSTEM`/`NODE_PDUID_MAP` pair per running instance (see `app/config.py`) — there's no per-request system switching. To bridge more than one data centre at once, run a separate bridge container per DC, each with its own `.env` (distinct `EXADIGIT_SYSTEM`, `NODE_PDUID_MAP`, and `BRIDGE_PORT`).
