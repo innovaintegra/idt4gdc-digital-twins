@@ -1,0 +1,19 @@
+# Master copy. Copy to .github/workflows/auto-add-to-project.yml in each repo
+# and set the GLOBAL_PROJECT_PAT secret there (needs the "project" scope).
+name: Auto Add to Global Project
+
+on:
+  issues:
+    types: [opened, reopened]
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  add-to-project:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add to project
+        uses: actions/add-to-project@v1.0.2
+        with:
+          project-url: https://github.com/orgs/innovaintegra/projects/16
+          github-token: ${{ secrets.GLOBAL_PROJECT_PAT }}
